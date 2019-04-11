@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // Connect to MongoDB
 mongoose
   .connect(
-    'mongodb://mongo:27017/docker-node-mongo',
+    'mongodb://mongo:27017/yatio-prueba',
     { useNewUrlParser: true }
   )
   .then(() => console.log('MongoDB Connected'))
@@ -27,8 +27,9 @@ app.get('/', (req, res) => {
 
 app.post('/item/add', (req, res) => {
   const newItem = new Item({
-    name: req.body.name
-  });
+    name: req.body.name,
+    apellido: req.body.apellido
+    });
 
   newItem.save().then(item => res.redirect('/'));
 });
