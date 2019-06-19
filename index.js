@@ -1,39 +1,39 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
+// create express app
 const app = express();
 
-app.set('view engine', 'ejs');
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }))
 
-app.use(bodyParser.urlencoded({ extended: false }));
+// parse application/json
+app.use(bodyParser.json())
 
-// Connect to MongoDB
-mongoose
-  .connect(
-    'mongodb://mongo:27017/yatio-prueba',
-    { useNewUrlParser: true }
-  )
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.log(err));
+// Configuring the database
+const dbConfig = require('./config/database.config.js');
+const mongoose = require('mongoose');
 
-const Item = require('./models/Item');
+mongoose.Promise = global.Promise;
 
+// Connecting to the database
+mongoose.connect(dbConfig.url, {
+	useNewUrlParser: true
+}).then(() => {
+    console.log("Successfully connected to the database");    
+}).catch(err => {
+    console.log('Could not connect to the database. Exiting now...', err);
+    process.exit();
+});
+
+// define a simple route
 app.get('/', (req, res) => {
-  Item.find()
-    .then(items => res.render('index', { items }))
-    .catch(err => res.status(404).json({ msg: 'No items found' }));
+    res.json({"message": "Welcome to EasyNotes application. Take notes quickly. Organize and keep track of all your notes."});
 });
 
-app.post('/item/add', (req, res) => {
-  const newItem = new Item({
-    name: req.body.name,
-    apellido: req.body.apellido
-    });
+require('./app/routes/note.routes.js')(app);
 
-  newItem.save().then(item => res.redirect('/'));
+// listen for requests
+app.listen(3000, () => {
+    console.log("Server is listening on port 3000");
 });
-
-const port = 3000;
-
-app.listen(port, () => console.log('Server running...'));
